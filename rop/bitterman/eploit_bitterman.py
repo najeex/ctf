@@ -1,5 +1,11 @@
 from pwn import *
 
+import catboost
+
+
+catboost.CatBoostClassifier
+
+
 
 #context(terminal=['tmux','new-window'])
 p = process('./bitterman')
